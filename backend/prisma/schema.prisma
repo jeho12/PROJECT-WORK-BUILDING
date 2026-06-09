@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
+enum Role {
+  student
+  supervisor
+  admin
+}
+
+enum WeekStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+enum SessionStatus {
+  scheduled
+  completed
+  cancelled
+  missed
+}
+
+// ─────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role     @default(student)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  student_profile       StudentProfile?
+  supervised_students   StudentProfile[] @relation("SupervisorStudents")
+  attendance_logs       AttendanceLog[]
+  ai_reviews_received   AIReview[]       @relation("StudentAIReviews")
+  ai_reviews_generated  AIReview[]       @relation("SupervisorAIReviews")
+  sessions_as_student   SupervisionSession[] @relation("StudentSessions")
+  sessions_as_supervisor SupervisionSession[] @relation("SupervisorSessions")
+  logbook_weeks         LogbookWeek[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// STUDENT PROFILE
+// ─────────────────────────────────────────
+
+model StudentProfile {
+  id                      String   @id @default(cuid())
+  user_id                 String   @unique
+  supervisor_id           String?
+  matric_number           String   @unique
+  department              String
+  faculty                 String
+  level                   String
+  school_email            String?
+  organization_name       String?
+  organization_address    String?
+  organization_latitude   Float?
+  organization_longitude  Float?
+  industry_supervisor_name String?
+  training_start_date     DateTime?
+  training_end_date       DateTime?
+  passport_path           String?
+  profile_complete        Boolean  @default(false)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  // Relations
+  user       User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  supervisor User? @relation("SupervisorStudents", fields: [supervisor_id], references: [id])
+
+  @@index([supervisor_id])
+  @@index([matric_number])
+  @@map("student_profiles")
+}
+
+// ─────────────────────────────────────────
+// LOGBOOK WEEKS
+// ─────────────────────────────────────────
+
+model LogbookWeek {
+  id              String     @id @default(cuid())
+  user_id         String
+  week_number     Int
+  week_start_date DateTime
+  week_end_date   DateTime
+  status          WeekStatus @default(draft)
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  logbook_days LogbookDay[]
+  weekly_report WeeklyReport?
+
+  @@index([user_id])
+  @@index([status])
+  @@map("logbook_weeks")
+}
+
+// ─────────────────────────────────────────
+// LOGBOOK DAYS
+// ─────────────────────────────────────────
+
+model LogbookDay {
+  id              String   @id @default(cuid())
+  logbook_week_id String
+  date            DateTime
+  day_name        String
+  time_in         String?
+  time_out        String?
+  activity        String?  @db.Text
+  locked          Boolean  @default(false)
+  locked_at       DateTime?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relations
+  logbook_week    LogbookWeek     @relation(fields: [logbook_week_id], references: [id], onDelete: Cascade)
+  attachments     LogbookAttachment[]
+  attendance_log  AttendanceLog?
+
+  @@index([logbook_week_id])
+  @@index([date])
+  @@map("logbook_days")
+}
+
+// ─────────────────────────────────────────
+// LOGBOOK ATTACHMENTS
+// ─────────────────────────────────────────
+
+model LogbookAttachment {
+  id             String   @id @default(cuid())
+  logbook_day_id String
+  file_url       String
+  file_name      String
+  file_type      String
+  file_size      Int
+  uploaded_at    DateTime @default(now())
+
+  logbook_day LogbookDay @relation(fields: [logbook_day_id], references: [id], onDelete: Cascade)
+
+  @@index([logbook_day_id])
+  @@map("logbook_attachments")
+}
+
+// ─────────────────────────────────────────
+// WEEKLY REPORTS
+// ─────────────────────────────────────────
+
+model WeeklyReport {
+  id                String       @id @default(cuid())
+  logbook_week_id   String       @unique
+  projects          String?      @db.Text
+  section_department String?
+  student_comment   String?      @db.Text
+  work_done         String?      @db.Text
+  review_status     ReviewStatus @default(pending)
+  reviewed_by       String?
+  supervisor_comment String?     @db.Text
+  supervisor_name   String?
+  supervisor_rank   String?
+  submitted_at      DateTime     @default(now())
+  approved_at       DateTime?
+  updated_at        DateTime     @updatedAt
+
+  logbook_week LogbookWeek @relation(fields: [logbook_week_id], references: [id], onDelete: Cascade)
+
+  @@index([review_status])
+  @@map("weekly_reports")
+}
+
+// ─────────────────────────────────────────
+// ATTENDANCE LOGS
+// ─────────────────────────────────────────
+
+model AttendanceLog {
+  id                  String    @id @default(cuid())
+  user_id             String
+  logbook_day_id      String    @unique
+  date                DateTime
+  check_in_time       DateTime?
+  check_out_time      DateTime?
+  check_in_latitude   Float?
+  check_in_longitude  Float?
+  check_in_address    String?
+  check_out_latitude  Float?
+  check_out_longitude Float?
+  check_out_address   String?
+  ip_address          String?
+  device_info         String?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  logbook_day LogbookDay @relation(fields: [logbook_day_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([date])
+  @@map("attendance_logs")
+}
+
+// ─────────────────────────────────────────
+// AI REVIEWS
+// ─────────────────────────────────────────
+
+model AIReview {
+  id              String   @id @default(cuid())
+  student_id      String
+  generated_by    String
+  month           Int
+  year            Int
+  summary         String   @db.Text
+  evaluation      String   @db.Text
+  strengths       Json
+  weaknesses      Json
+  recommendations String   @db.Text
+  rating          Float
+  tokens_used     Int?
+  created_at      DateTime @default(now())
+
+  student      User @relation("StudentAIReviews", fields: [student_id], references: [id], onDelete: Cascade)
+  generated_by_user User @relation("SupervisorAIReviews", fields: [generated_by], references: [id])
+
+  @@index([student_id])
+  @@index([month, year])
+  @@map("ai_reviews")
+}
+
+// ─────────────────────────────────────────
+// SUPERVISION SESSIONS
+// ─────────────────────────────────────────
+
+model SupervisionSession {
+  id                  String        @id @default(cuid())
+  supervisor_id       String
+  student_id          String
+  title               String
+  description         String?       @db.Text
+  scheduled_at        DateTime
+  duration_minutes    Int           @default(30)
+  provider            String        @default("jitsi")
+  room_name           String        @unique
+  join_url            String
+  status              SessionStatus @default(scheduled)
+  location_verified   Boolean       @default(false)
+  student_joined_at   DateTime?
+  supervisor_joined_at DateTime?
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
+
+  supervisor User @relation("SupervisorSessions", fields: [supervisor_id], references: [id])
+  student    User @relation("StudentSessions", fields: [student_id], references: [id])
+
+  @@index([supervisor_id])
+  @@index([student_id])
+  @@index([scheduled_at])
+  @@map("supervision_sessions")
+}
