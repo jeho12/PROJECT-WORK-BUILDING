@@ -155,10 +155,12 @@ export default function AdminAssignmentsPage() {
 
           <form onSubmit={handleAssignSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="select-student" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Select Unallocated Student
               </label>
               <select
+                id="select-student"
+                title="Select Unallocated Student"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
@@ -176,10 +178,12 @@ export default function AdminAssignmentsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="select-supervisor" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Select Faculty Supervisor
               </label>
               <select
+                id="select-supervisor"
+                title="Select Faculty Supervisor"
                 value={selectedSupervisorId}
                 onChange={(e) => setSelectedSupervisorId(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"

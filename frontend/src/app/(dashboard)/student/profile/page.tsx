@@ -160,10 +160,13 @@ export default function StudentProfilePage() {
               <h3 className="text-base font-bold text-text-primary border-b border-border-custom pb-2">Academic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+                  <label htmlFor="profile-name" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                     Full Name
                   </label>
                   <input
+                    id="profile-name"
+                    title="Full Name"
+                    placeholder="Full Name"
                     type="text"
                     value={user?.name || ''}
                     readOnly
@@ -171,10 +174,13 @@ export default function StudentProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+                  <label htmlFor="profile-email" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                     School Email Address
                   </label>
                   <input
+                    id="profile-email"
+                    title="School Email Address"
+                    placeholder="School Email Address"
                     type="text"
                     value={user?.email || ''}
                     readOnly
@@ -405,6 +411,7 @@ export default function StudentProfilePage() {
                     {/* OpenStreetMap Static Map Iframe */}
                     <div className="mt-3 rounded-lg overflow-hidden border border-border-custom h-32 bg-slate-100 relative">
                       <iframe 
+                        title="Student SIWES Placement Organization Google Map Location"
                         width="100%" 
                         height="100%" 
                         src={`https://maps.google.com/maps?q=${coordsCaptured.lat},${coordsCaptured.lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`}

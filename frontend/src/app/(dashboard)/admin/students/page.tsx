@@ -134,6 +134,8 @@ export default function AdminStudentsPage() {
           <div className="flex items-center space-x-1.5 text-xs font-medium text-text-secondary">
             <span>Faculty:</span>
             <select
+              title="Filter by Faculty"
+              aria-label="Filter by Faculty"
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
               className="bg-slate-50 border border-border-custom px-2 py-1 rounded outline-none text-text-primary"
@@ -145,6 +147,8 @@ export default function AdminStudentsPage() {
           <div className="flex items-center space-x-1.5 text-xs font-medium text-text-secondary">
             <span>Level:</span>
             <select
+              title="Filter by Level"
+              aria-label="Filter by Level"
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
               className="bg-slate-50 border border-border-custom px-2 py-1 rounded outline-none text-text-primary"
@@ -158,6 +162,8 @@ export default function AdminStudentsPage() {
           <div className="flex items-center space-x-1.5 text-xs font-medium text-text-secondary">
             <span>Assignment:</span>
             <select
+              title="Filter by Assignment Status"
+              aria-label="Filter by Assignment Status"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="bg-slate-50 border border-border-custom px-2 py-1 rounded outline-none text-text-primary"
@@ -191,6 +197,8 @@ export default function AdminStudentsPage() {
               <button 
                 onClick={() => setSelectedStudent(null)}
                 className="p-1 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 focus:outline-none"
+                title="Close details dialog"
+                aria-label="Close details dialog"
               >
                 <X className="w-5 h-5 shrink-0" />
               </button>

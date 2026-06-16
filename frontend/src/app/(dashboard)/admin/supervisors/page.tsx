@@ -109,6 +109,8 @@ export default function AdminSupervisorsPage() {
         <button
           onClick={() => setSupervisorToDelete(row)}
           className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
+          title="Delete Supervisor"
+          aria-label="Delete Supervisor"
         >
           <Trash2 className="w-4 h-4 shrink-0" />
         </button>
@@ -177,10 +179,12 @@ export default function AdminSupervisorsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="select-department" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Academic Faculty Department
               </label>
               <select
+                id="select-department"
+                title="Academic Faculty Department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
