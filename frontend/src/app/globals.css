@@ -16,6 +16,7 @@
   
   /* Redefine white and slate-50/100/200 for automatic dark mode translation */
   --color-white: var(--surface);
+  --color-white-pure: #ffffff;
   --color-slate-50: var(--slate-50-override);
   --color-slate-100: var(--slate-100-override);
   --color-slate-200: var(--slate-200-override);

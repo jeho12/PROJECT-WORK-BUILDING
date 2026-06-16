@@ -10,6 +10,8 @@ import LoadingSkeleton from '@/components/shared/LoadingSkeleton';
 import { Calendar, MapPin, CheckCircle, Navigation } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { useQuery } from '@tanstack/react-query';
+import { studentService } from '@/services/student.service';
 
 export default function StudentAttendancePage() {
   const { user } = useAuth();
@@ -22,12 +24,19 @@ export default function StudentAttendancePage() {
   const { coords, loading: isLocating, capture } = useGeolocation();
   const [addressResolved, setAddressResolved] = useState('');
 
+  // Profile query
+  const { data: profile } = useQuery({
+    queryKey: ['student_profile', studentId],
+    queryFn: () => studentService.getProfile(studentId),
+    enabled: !!studentId
+  });
+
   // Handle auto resolve address on coords capture
   useEffect(() => {
     if (coords) {
-      setAddressResolved('Chevron Corporate HQ Plaza, Lekki Peninsular, Lagos');
+      setAddressResolved(profile?.organizationAddress || 'Chevron Corporate HQ Plaza, Lekki Peninsular, Lagos');
     }
-  }, [coords]);
+  }, [coords, profile]);
 
   const handlePunch = async (type: 'in' | 'out') => {
     if (!coords) {
@@ -184,6 +193,7 @@ export default function StudentAttendancePage() {
           <div className="h-44 bg-slate-100 rounded-lg overflow-hidden border border-border-custom relative">
             {coords ? (
               <iframe 
+                title="Student SIWES Placement Organization Google Map Location"
                 width="100%" 
                 height="100%" 
                 src={`https://maps.google.com/maps?q=${coords.lat},${coords.lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`}

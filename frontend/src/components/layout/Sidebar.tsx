@@ -83,8 +83,8 @@ export default function Sidebar() {
       <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/20">
         <Building className="w-6 h-6 text-primary-light mr-3" />
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-white tracking-wider">AUL SIWES PORTAL</span>
-          <span className="text-[10px] text-slate-400">Anchor University, Lagos</span>
+          <span className="font-bold text-sm text-white-pure tracking-wider">AUL SIWES PORTAL</span>
+          <span className="text-[10px] text-slate-300">Anchor University, Lagos</span>
         </div>
       </div>
 
@@ -100,8 +100,8 @@ export default function Sidebar() {
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 gap-3 ${
                 isActive
-                  ? 'bg-primary/10 text-white border-l-4 border-primary-light pl-3'
-                  : 'hover:bg-slate-800/50 hover:text-white'
+                  ? 'bg-primary/10 text-white-pure border-l-4 border-primary-light pl-3'
+                  : 'hover:bg-slate-800/50 hover:text-white-pure'
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'text-primary-light' : 'text-slate-400'}`} />
@@ -114,17 +114,17 @@ export default function Sidebar() {
       {/* Student profile banner / Logout section */}
       <div className="p-4 border-t border-slate-800 bg-slate-950/10 flex flex-col space-y-3">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 bg-primary-light/10 border border-slate-700 flex items-center justify-center rounded-full text-white font-bold uppercase text-sm">
+          <div className="w-9 h-9 bg-primary-light/10 border border-slate-700 flex items-center justify-center rounded-full text-white-pure font-bold uppercase text-sm">
             {user?.name?.charAt(0) || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate leading-tight">{user?.name}</p>
-            <p className="text-xs text-slate-400 truncate capitalize">{role}</p>
+            <p className="text-sm font-semibold text-white-pure truncate leading-tight">{user?.name}</p>
+            <p className="text-xs text-slate-300 truncate capitalize">{role}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="flex items-center justify-center w-full px-3 py-2 text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-950/30 border border-rose-900/30 hover:border-rose-900 rounded-lg transition-all gap-2"
+          className="flex items-center justify-center w-full px-3 py-2 text-xs font-semibold text-rose-400 hover:text-white-pure hover:bg-rose-950/30 border border-rose-900/30 hover:border-rose-900 rounded-lg transition-all gap-2"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out</span>

@@ -192,6 +192,9 @@ export default function AdminSupervisorsPage() {
                 <option value="Computer Science">Computer Science</option>
                 <option value="Software Engineering">Software Engineering</option>
                 <option value="Information Technology">Information Technology</option>
+                <option value="Biology">Biology</option>
+                <option value="Biochemistry">Biochemistry</option>
+                <option value="Industrial Chemistry">Industrial Chemistry</option>
                 <option value="Mathematics">Mathematics</option>
               </select>
             </div>

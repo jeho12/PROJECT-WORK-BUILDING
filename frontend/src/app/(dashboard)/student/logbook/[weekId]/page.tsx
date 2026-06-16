@@ -23,9 +23,14 @@ import {
   ChevronDown, 
   ChevronUp, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  MapPin,
+  UserCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { useAttendance } from '@/hooks/useAttendance';
 
 export default function StudentLogbookDetail() {
   const params = useParams();
@@ -46,7 +51,9 @@ export default function StudentLogbookDetail() {
   } = useLogbook(studentId);
 
   const { data: week, isLoading } = useWeekQuery(weekId);
-  const [activeTab, setActiveTab] = useState<'daily' | 'report' | 'attachments'>('daily');
+
+  const { useStatusQuery } = useAttendance(studentId);
+  const { data: todayStatus, isLoading: isLoadingStatus } = useStatusQuery(studentId);
 
   // Handle file uploads
   const onDrop = async (acceptedFiles: File[]) => {
@@ -113,139 +120,308 @@ export default function StudentLogbookDetail() {
             Timeline: {format(new Date(week.startDate), 'MMMM dd')} to {format(new Date(week.endDate), 'MMMM dd, yyyy')}
           </p>
         </div>
+      </div>
+
+      {/* Side-by-side grid layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Supervisor Comments (Visible if reviewed) */}
-        {(week.status === 'approved' || week.status === 'rejected') && week.supervisorComment && (
-          <div className="p-4 bg-slate-50 border border-border-custom rounded-xl max-w-md">
-            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">Supervisor Sign-Off Feedback</span>
-            <p className="text-xs text-text-primary mt-1 leading-relaxed">"{week.supervisorComment}"</p>
-            <div className="mt-2 text-[10px] text-text-secondary font-semibold">
-              Signed: {week.supervisorSignature} ({week.supervisorRank})
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Tabs list */}
-      <div className="flex border-b border-border-custom bg-white p-1 rounded-xl shadow-xs border max-w-md">
-        {(['daily', 'report', 'attachments'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all capitalize focus:outline-none ${
-              activeTab === tab 
-                ? 'bg-primary text-white shadow-xs' 
-                : 'text-text-secondary hover:text-text-primary hover:bg-slate-50'
-            }`}
-          >
-            {tab === 'daily' ? 'Daily Entries' : tab === 'report' ? 'Weekly Summary' : 'Evidence Documents'}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Contents */}
-      {activeTab === 'daily' && (
-        <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-200 text-primary p-4 rounded-xl flex items-start space-x-3 text-xs">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <div className="leading-relaxed">
-              <span className="font-bold">Important:</span> Once you submit a daily entry, it will be **permanently locked** and cannot be edited. Ensure you write at least 50 characters summarizing your exact activities.
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {week.dayEntries.map((day) => (
-              <DailyLogCard 
-                key={day.id} 
-                day={day} 
-                onSubmit={submitDay}
-                isWeekEditable={isEditable}
-                loading={isSubmittingDay}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'report' && (
-        <div className="bg-white border border-border-custom rounded-xl p-6 shadow-sm max-w-3xl">
-          <h3 className="text-base font-bold text-text-primary mb-4 pb-2 border-b border-border-custom">Weekly Summary Report</h3>
+        {/* Left Column - Forms and Stack (Spans 2 columns) */}
+        <div className="lg:col-span-2 space-y-8">
           
-          <WeeklyReportForm 
-            week={week} 
-            onSubmit={submitWeeklyReport}
-            isWeekEditable={isEditable}
-            loading={isSubmittingReport}
-          />
-        </div>
-      )}
+          {/* Section 1: Daily Logbook Cards Stack */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-border-custom">
+              <h2 className="text-lg font-bold text-text-primary">Daily Activity Logs</h2>
+              <span className="text-xs text-text-secondary">Monday – Friday</span>
+            </div>
 
-      {activeTab === 'attachments' && (
-        <div className="bg-white border border-border-custom rounded-xl p-6 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-text-primary mb-1">Evidence Documents & Attachments</h3>
-            <p className="text-xs text-text-secondary">Upload PDF reports or PNG/JPG screenshots of your work as evidence for validation.</p>
+            <div className="bg-blue-50/70 border border-blue-200/50 text-blue-800 p-4 rounded-xl flex items-start space-x-3 text-xs">
+              <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
+              <div className="leading-relaxed">
+                <span className="font-bold">Important:</span> Once you submit a daily entry, it will be **permanently locked** and cannot be edited. Ensure you write at least 50 characters summarizing your exact activities.
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {week.dayEntries.map((day) => (
+                <DailyLogCard 
+                  key={day.id} 
+                  day={day} 
+                  onSubmit={submitDay}
+                  isWeekEditable={isEditable}
+                  loading={isSubmittingDay}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Upload Dropzone */}
-          {isEditable && (
-            <div 
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center ${
-                isDragActive ? 'border-primary bg-blue-50/50' : 'border-border-custom hover:bg-slate-50/55'
-              }`}
-            >
-              <input {...getInputProps()} />
-              <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
-              <p className="text-sm font-semibold text-text-primary">Drag & drop files here, or click to browse</p>
-              <p className="text-xs text-text-secondary mt-1">Supports PDF, JPEG, and PNG (Max 5MB)</p>
+          {/* Section 2: Weekly Summary Report Form */}
+          <div className="bg-white border border-border-custom rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center space-x-2.5 mb-5 pb-3 border-b border-border-custom">
+              <FileText className="w-5 h-5 text-primary" />
+              <h3 className="text-base font-bold text-text-primary">Weekly Summary Report</h3>
             </div>
-          )}
+            
+            <WeeklyReportForm 
+              week={week} 
+              onSubmit={submitWeeklyReport}
+              isWeekEditable={isEditable}
+              loading={isSubmittingReport}
+            />
+          </div>
 
-          {/* Attachments List */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">Uploaded Evidence ({week.attachments?.length || 0})</h4>
-            {week.attachments && week.attachments.length > 0 ? (
-              <div className="divide-y divide-slate-100 border border-border-custom rounded-lg overflow-hidden">
-                {week.attachments.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3.5 bg-slate-50/50 text-xs">
-                    <div className="flex items-center space-x-2.5 min-w-0">
-                      <Paperclip className="w-4 h-4 text-slate-400 shrink-0" />
-                      <div className="truncate">
-                        <span className="font-semibold text-text-primary block truncate">{file.name}</span>
-                        <span className="text-[10px] text-text-secondary block">
-                          {Math.round(file.size ? file.size / 1024 : 0)} KB • Uploaded {format(new Date(file.uploadedAt), 'MMM dd, HH:mm')}
-                        </span>
+          {/* Section 3: Evidence Documents & Attachments Upload Widget */}
+          <div className="bg-white border border-border-custom rounded-2xl p-6 shadow-sm space-y-6">
+            <div>
+              <h3 className="text-base font-bold text-text-primary mb-1">Evidence Documents & Attachments</h3>
+              <p className="text-xs text-text-secondary">Upload PDF reports or PNG/JPG screenshots of your work as evidence for validation.</p>
+            </div>
+
+            {/* Upload Dropzone */}
+            {isEditable && (
+              <div 
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center ${
+                  isDragActive 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border-custom hover:bg-slate-50/50'
+                }`}
+              >
+                <input {...getInputProps()} />
+                <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
+                <p className="text-sm font-semibold text-text-primary">Drag & drop files here, or click to browse</p>
+                <p className="text-xs text-text-secondary mt-1">Supports PDF, JPEG, and PNG (Max 5MB)</p>
+              </div>
+            )}
+
+            {/* Attachments List */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">Uploaded Evidence ({week.attachments?.length || 0})</h4>
+              {week.attachments && week.attachments.length > 0 ? (
+                <div className="divide-y divide-slate-100 border border-border-custom rounded-lg overflow-hidden">
+                  {week.attachments.map((file) => (
+                    <div key={file.id} className="flex items-center justify-between p-3.5 bg-slate-50/30 text-xs">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <Paperclip className="w-4 h-4 text-slate-400 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-semibold text-text-primary block truncate">{file.name}</span>
+                          <span className="text-[10px] text-text-secondary block">
+                            {Math.round(file.size ? file.size / 1024 : 0)} KB • Uploaded {format(new Date(file.uploadedAt), 'MMM dd, HH:mm')}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <a 
+                          href="#" 
+                          onClick={(e) => { e.preventDefault(); toast.success('Mock downloading file...'); }}
+                          className="text-primary hover:text-primary-light font-bold"
+                        >
+                          Download
+                        </a>
+                        {isEditable && (
+                          <button
+                            onClick={() => deleteAttachment({ weekId, attachmentId: file.id })}
+                            className="p-1 text-slate-400 hover:text-rose-600 transition-colors"
+                            title="Delete attachment"
+                            aria-label="Delete attachment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <a 
-                        href="#" 
-                        onClick={(e) => { e.preventDefault(); toast.success('Mock downloading file...'); }}
-                        className="text-primary font-bold hover:underline"
-                      >
-                        Download
-                      </a>
-                      {isEditable && (
-                        <button
-                          onClick={() => deleteAttachment({ weekId, attachmentId: file.id })}
-                          className="p-1 text-slate-400 hover:text-rose-600 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg text-xs text-text-secondary">
+                  No attachments uploaded for this week yet.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Sidebars (Spans 1 column) */}
+        <div className="space-y-6">
+          
+          {/* Week Progress Checklist Card */}
+          {(() => {
+            const completedDays = week.dayEntries.filter((d) => d.isLocked).length;
+            const progressPercent = Math.round((completedDays / 5) * 100);
+            
+            const getStatusIndicator = (day: DayEntry) => {
+              if (day.isLocked) {
+                return { 
+                  icon: '🔒', 
+                  text: 'Locked', 
+                  colorClass: 'text-text-secondary bg-slate-100 border border-slate-200' 
+                };
+              }
+              if (day.activity && day.activity.trim().length > 0) {
+                return { 
+                  icon: '✅', 
+                  text: 'Draft Filled', 
+                  colorClass: 'text-emerald-700 bg-emerald-50 border border-emerald-200' 
+                };
+              }
+              return { 
+                icon: '⏳', 
+                text: 'Empty', 
+                colorClass: 'text-amber-700 bg-amber-50 border border-amber-200' 
+              };
+            };
+
+            const widthClass = 
+              completedDays === 1 ? 'w-1/5' : 
+              completedDays === 2 ? 'w-2/5' : 
+              completedDays === 3 ? 'w-3/5' : 
+              completedDays === 4 ? 'w-4/5' : 
+              completedDays === 5 ? 'w-full' : 'w-0';
+
+            return (
+              <div className="bg-white border border-border-custom rounded-2xl p-6 shadow-sm space-y-6">
+                <div>
+                  <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3">Week Progress</h3>
+                  
+                  {/* Progress bar */}
+                  <div className="space-y-2 mb-6">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-text-secondary">Logs Locked</span>
+                      <span className="font-bold text-primary">{completedDays} / 5 days</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className={`bg-primary h-2 rounded-full transition-all duration-500 ${widthClass}`}
+                      />
                     </div>
                   </div>
-                ))}
+
+                  {/* List of days */}
+                  <div className="space-y-3">
+                    {week.dayEntries.map((day) => {
+                      const status = getStatusIndicator(day);
+                      return (
+                        <div key={day.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/30">
+                          <div>
+                            <span className="text-xs font-bold text-text-primary block">{day.dayName}</span>
+                            <span className="text-[10px] text-text-secondary">{format(new Date(day.date), 'MMM dd')}</span>
+                          </div>
+                          <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ${status.colorClass}`}>
+                            <span>{status.icon}</span>
+                            <span>{status.text}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Live Attendance Details Card */}
+          <div className="bg-white border border-border-custom rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center space-x-2 mb-4">
+              <Clock className="w-4 h-4 text-primary" />
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Today's Attendance</h3>
+            </div>
+            
+            {isLoadingStatus ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 bg-slate-100 rounded w-1/3"></div>
+                <div className="h-10 bg-slate-100 rounded"></div>
+              </div>
+            ) : todayStatus?.record ? (
+              <div className="space-y-4">
+                <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-100 space-y-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-text-secondary uppercase block">Clock In</span>
+                    <span className="text-xs text-text-primary font-mono mt-0.5 block">{todayStatus.record.checkInTime}</span>
+                    <div className="flex items-start space-x-1 mt-1 text-[10px] text-text-secondary">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{todayStatus.record.checkInAddress || 'Location captured'}</span>
+                    </div>
+                  </div>
+
+                  {todayStatus.record.checkOutTime && (
+                    <div className="pt-2.5 border-t border-slate-100">
+                      <span className="text-[10px] font-bold text-text-secondary uppercase block">Clock Out</span>
+                      <span className="text-xs text-text-primary font-mono mt-0.5 block">{todayStatus.record.checkOutTime}</span>
+                      <div className="flex items-start space-x-1 mt-1 text-[10px] text-text-secondary">
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed">{todayStatus.record.checkOutAddress || 'Location captured'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {todayStatus.status === 'checked_in' && (
+                  <div className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl font-semibold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                    <span>Currently clocked in. Remember to check out at the end of the day.</span>
+                  </div>
+                )}
+                {todayStatus.status === 'completed' && (
+                  <div className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl font-semibold flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                    <span>Attendance registry completed for today.</span>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg text-xs text-text-secondary">
-                No attachments uploaded for this week yet.
+              <div className="space-y-3">
+                <div className="text-center py-5 border border-dashed border-slate-200 rounded-xl text-xs text-text-secondary">
+                  No attendance logged for today yet.
+                </div>
+                <Link 
+                  href="/student/attendance"
+                  className="w-full inline-flex items-center justify-center py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-text-primary rounded-xl transition-all border border-border-custom text-center"
+                >
+                  Go to Attendance Panel
+                </Link>
               </div>
             )}
           </div>
+
+          {/* Supervisor Feedback / Comment Panel */}
+          {(() => {
+            const hasFeedback = (week.status === 'approved' || week.status === 'rejected') && week.supervisorComment;
+            
+            return (
+              <div className="bg-white border border-border-custom rounded-2xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center space-x-2">
+                  <UserCheck className="w-4 h-4 text-primary" />
+                  <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Supervisor Status</h3>
+                </div>
+
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <span className="text-xs text-text-secondary">Sign-off Status:</span>
+                  <StatusBadge status={week.status} />
+                </div>
+
+                {hasFeedback ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-slate-50/50 border border-slate-100 rounded-xl text-xs">
+                      <span className="text-[10px] font-bold text-text-secondary uppercase block">Comment:</span>
+                      <p className="text-xs text-text-primary mt-1 leading-relaxed italic">
+                        "{week.supervisorComment}"
+                      </p>
+                    </div>
+                    <div className="text-[10px] text-text-secondary font-semibold">
+                      Signed: {week.supervisorSignature} ({week.supervisorRank})
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-xs text-text-secondary italic bg-slate-50/30 rounded-xl border border-slate-100/50">
+                    No supervisor comments available yet.
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
         </div>
-      )}
+      </div>
     </div>
   );
 }

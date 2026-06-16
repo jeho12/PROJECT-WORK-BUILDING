@@ -8,6 +8,7 @@ import { useAttendance } from '@/hooks/useAttendance';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useQuery } from '@tanstack/react-query';
 import { sessionService } from '@/services/session.service';
+import { studentService } from '@/services/student.service';
 import StatusBadge from '@/components/shared/StatusBadge';
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton';
 import { 
@@ -43,6 +44,13 @@ export default function StudentDashboard() {
     queryFn: () => sessionService.getSessions(studentId, 'student')
   });
 
+  // Profile query
+  const { data: profile } = useQuery({
+    queryKey: ['student_profile', studentId],
+    queryFn: () => studentService.getProfile(studentId),
+    enabled: !!studentId
+  });
+
   // Calculations for stats row
   const stats = React.useMemo(() => {
     if (!weeks) return { submitted: 0, total: 0, pending: 0 };
@@ -70,7 +78,7 @@ export default function StudentDashboard() {
     }
 
     try {
-      const address = 'Chevron Plaza Office, Lekki'; // Hardcoded address resolver
+      const address = profile?.organizationAddress || 'Chevron Plaza Office, Lekki'; // Eager loaded from student profile
       if (todayStatus?.status === 'not_checked_in') {
         await checkIn({ lat: coords.lat, lng: coords.lng, address });
       } else if (todayStatus?.status === 'checked_in') {

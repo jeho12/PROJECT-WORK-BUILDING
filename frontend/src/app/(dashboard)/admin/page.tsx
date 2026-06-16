@@ -58,10 +58,12 @@ export default function AdminDashboardPage() {
     { name: 'Computer Science', value: 15 },
     { name: 'Software Engineering', value: 10 },
     { name: 'Information Technology', value: 8 },
-    { name: 'Computer Engineering', value: 7 }
+    { name: 'Biology', value: 5 },
+    { name: 'Biochemistry', value: 4 },
+    { name: 'Industrial Chemistry', value: 3 }
   ];
 
-  const COLORS = ['#1E40AF', '#3B82F6', '#059669', '#F59E0B'];
+  const COLORS = ['#1E40AF', '#3B82F6', '#059669', '#F59E0B', '#8B5CF6', '#EC4899'];
 
   const lineData = Array.from({ length: 15 }).map((_, idx) => ({
     day: `Day ${idx + 1}`,

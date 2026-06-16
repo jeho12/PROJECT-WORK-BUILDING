@@ -88,26 +88,12 @@ export const supervisorService = {
     const response = await api.get('/supervisor/students');
     const profiles = response.data.data || [];
     
-    // In parallel, fetch details and weeks for each student to display accurate rates and counts
-    const detailPromises = profiles.map((p: any) => 
-      api.get(`/supervisor/students/${p.user_id}`).catch(() => null)
-    );
-    const detailsResponses = await Promise.all(detailPromises);
-    
-    const weeksPromises = profiles.map((p: any) => 
-      api.get(`/supervisor/students/${p.user_id}/weeks`).catch(() => null)
-    );
-    const weeksResponses = await Promise.all(weeksPromises);
-    
-    return profiles.map((p: any, index: number) => {
-      const details = detailsResponses[index]?.data?.data;
-      const weeks = weeksResponses[index]?.data?.data || [];
-      
+    return profiles.map((p: any) => {
+      const weeks = p.user?.logbook_weeks || [];
       const totalWeeksCount = weeks.length || 1;
       const submittedWeeksCount = weeks.filter((w: any) => w.status !== 'draft').length;
       
-      const stats = details?.stats;
-      const attendanceCount = stats?.totalAttendance || 0;
+      const attendanceCount = p.user?.attendance_logs?.length || 0;
       const attendanceRate = attendanceCount > 0 ? Math.min(100, Math.round((attendanceCount / 60) * 100)) : 100;
       
       const status = weeks.some((w: any) => w.status === 'submitted') ? 'pending' : (p.profile_complete ? 'active' : 'inactive');

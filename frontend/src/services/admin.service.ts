@@ -89,18 +89,12 @@ export const adminService = {
     const response = await api.get('/admin/students', { params: { limit: 100 } });
     const list = response.data.data || [];
     
-    // In parallel, fetch weeks list for each student to fetch exact submission counts
-    const weeksPromises = list.map((p: any) => 
-      api.get(`/supervisor/students/${p.user_id}/weeks`).catch(() => null)
-    );
-    const weeksResponses = await Promise.all(weeksPromises);
-    
-    return list.map((p: any, index: number) => {
-      const weeks = weeksResponses[index]?.data?.data || [];
+    return list.map((p: any) => {
+      const weeks = p.user?.logbook_weeks || [];
       const totalWeeksCount = weeks.length || 1;
       const weeksSubmittedCount = weeks.filter((w: any) => w.status !== 'draft').length;
       
-      const attendanceCount = p.attendance_logs?.length || 0;
+      const attendanceCount = p.user?.attendance_logs?.length || 0;
       const attendanceRate = attendanceCount > 0 ? Math.min(100, Math.round((attendanceCount / 60) * 100)) : 100;
       
       const status = weeks.some((w: any) => w.status === 'submitted') ? 'pending' : (p.profile_complete ? 'active' : 'inactive');

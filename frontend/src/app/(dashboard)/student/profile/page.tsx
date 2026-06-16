@@ -10,8 +10,10 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { Upload, MapPin, Save, User } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function StudentProfilePage() {
+  const queryClient = useQueryClient();
   const { user, updateUser } = useAuthStore();
   const studentId = user?.id || '';
   const [loading, setLoading] = useState(false);
@@ -22,61 +24,54 @@ export default function StudentProfilePage() {
 
   const { coords, loading: isLocating, capture } = useGeolocation();
 
-  // Load existing profile if exists
-  const [initialLoading, setInitialLoading] = useState(true);
-
   const {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors }
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema)
   });
 
-  useEffect(() => {
-    async function loadProfile() {
-      try {
-        const profile = await studentService.getProfile(studentId);
-        if (profile) {
-          setValue('matricNumber', profile.matricNumber);
-          setValue('department', profile.department);
-          setValue('faculty', profile.faculty);
-          setValue('level', profile.level);
-          setValue('organizationName', profile.organizationName);
-          setValue('organizationAddress', profile.organizationAddress);
-          setValue('trainingStartDate', profile.trainingStartDate);
-          setValue('trainingEndDate', profile.trainingEndDate);
-          setValue('industrySupervisorName', profile.industrySupervisorName);
+  const { data: profile, isLoading: initialLoading } = useQuery({
+    queryKey: ['student_profile', studentId],
+    queryFn: () => studentService.getProfile(studentId),
+    enabled: !!studentId
+  });
 
-          if (profile.passportUrl) {
-            setPassportPreview(profile.passportUrl);
-          }
-          if (profile.orgLatitude && profile.orgLongitude) {
-            setCoordsCaptured({ lat: profile.orgLatitude, lng: profile.orgLongitude });
-            setReverseAddress(profile.organizationAddress);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load profile:', err);
-      } finally {
-        setInitialLoading(false);
+  useEffect(() => {
+    if (profile) {
+      setValue('matricNumber', profile.matricNumber);
+      setValue('department', profile.department);
+      setValue('faculty', profile.faculty);
+      setValue('level', profile.level);
+      setValue('organizationName', profile.organizationName);
+      setValue('organizationAddress', profile.organizationAddress);
+      setValue('trainingStartDate', profile.trainingStartDate);
+      setValue('trainingEndDate', profile.trainingEndDate);
+      setValue('industrySupervisorName', profile.industrySupervisorName);
+
+      if (profile.passportUrl) {
+        setPassportPreview(profile.passportUrl);
+      }
+      if (profile.orgLatitude && profile.orgLongitude) {
+        setCoordsCaptured({ lat: profile.orgLatitude, lng: profile.orgLongitude });
+        setReverseAddress(profile.organizationAddress);
       }
     }
-    if (studentId) {
-      loadProfile();
-    }
-  }, [studentId, setValue]);
+  }, [profile, setValue]);
 
   // Set coordinates when geolocation captures them
   useEffect(() => {
     if (coords) {
       setCoordsCaptured(coords);
-      // Mock reverse geocoding based on inputs or default to Lekki
-      setReverseAddress('Chevron Corporate HQ Plaza, Lekki Peninsular, Lagos');
+      // Map to the address that the user typed in the form
+      const typedAddress = getValues('organizationAddress') || getValues('organizationName') || 'Captured GPS Coordinates';
+      setReverseAddress(typedAddress);
       toast.success('Placement coordinates captured successfully!');
     }
-  }, [coords]);
+  }, [coords, getValues]);
 
   // Dropzone config
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
@@ -122,6 +117,7 @@ export default function StudentProfilePage() {
 
       // Update state in Zustand auth store
       updateUser({ profileComplete: true });
+      queryClient.invalidateQueries({ queryKey: ['student_profile', studentId] });
       toast.success('SIWES Profile successfully saved!');
     } catch (err: any) {
       toast.error(err.message || 'Failed to update profile');

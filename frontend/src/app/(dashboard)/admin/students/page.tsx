@@ -56,7 +56,15 @@ export default function AdminStudentsPage() {
   }
 
   // Departments List for filter
-  const departments = ['All', 'Computer Science', 'Software Engineering', 'Information Technology'];
+  const departments = [
+    'All',
+    'Computer Science',
+    'Software Engineering',
+    'Information Technology',
+    'Biology',
+    'Biochemistry',
+    'Industrial Chemistry'
+  ];
 
   const columns = [
     {

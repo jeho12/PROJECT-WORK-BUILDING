@@ -12,6 +12,16 @@ export class SupervisorService {
             name: true,
             email: true,
             is_active: true,
+            logbook_weeks: {
+              select: {
+                status: true
+              }
+            },
+            attendance_logs: {
+              select: {
+                id: true
+              }
+            }
           }
         }
       }
