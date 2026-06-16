@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogbook } from '@/hooks/useLogbook';
@@ -26,11 +26,29 @@ import {
   AlertCircle,
   Clock,
   MapPin,
-  UserCheck
+  UserCheck,
+  ShieldAlert,
+  Navigation
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useAttendance } from '@/hooks/useAttendance';
+import { useQuery } from '@tanstack/react-query';
+import { studentService } from '@/services/student.service';
+import { useGeolocation } from '@/hooks/useGeolocation';
+
+function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371e3; // Earth radius in meters
+  const rad = (deg: number) => deg * (Math.PI / 180);
+  const dLat = rad(lat2 - lat1);
+  const dLon = rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 export default function StudentLogbookDetail() {
   const params = useParams();
@@ -54,6 +72,95 @@ export default function StudentLogbookDetail() {
 
   const { useStatusQuery } = useAttendance(studentId);
   const { data: todayStatus, isLoading: isLoadingStatus } = useStatusQuery(studentId);
+
+  // Profile Query for location checking
+  const { data: profile } = useQuery({
+    queryKey: ['student_profile', studentId],
+    queryFn: () => studentService.getProfile(studentId),
+    enabled: !!studentId
+  });
+
+  // Geolocation
+  const { coords, loading: isLocating, capture } = useGeolocation();
+
+  useEffect(() => {
+    capture();
+  }, []);
+
+  const isWithinLocation = React.useMemo(() => {
+    if (!profile) return null;
+    if (!profile.orgLatitude || !profile.orgLongitude) return false;
+    if (!coords) return null;
+    const dist = getDistanceInMeters(coords.lat, coords.lng, profile.orgLatitude, profile.orgLongitude);
+    return dist <= 500;
+  }, [coords, profile]);
+
+  const renderLocationAlert = () => {
+    if (!profile) return null;
+    if (!profile.orgLatitude || !profile.orgLongitude) {
+      return (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl flex items-start space-x-3 text-xs mb-6">
+          <ShieldAlert className="w-5 h-5 shrink-0 text-rose-500" />
+          <div>
+            <span className="font-bold">SIWES Placement Coordinates Not Set:</span> Please configure your training placement coordinates in <Link href="/student/profile" className="underline font-bold">My Profile</Link> first to unlock logbook entries.
+          </div>
+        </div>
+      );
+    }
+    if (isLocating) {
+      return (
+        <div className="bg-slate-50 border border-border-custom text-text-primary p-4 rounded-xl flex items-center space-x-3 text-xs mb-6 animate-pulse">
+          <Navigation className="w-5 h-5 shrink-0 text-primary animate-spin" />
+          <span>Verifying physical SIWES placement coordinates...</span>
+        </div>
+      );
+    }
+    if (!coords) {
+      return (
+        <div className="bg-amber-50 border border-amber-250 text-amber-850 p-4 rounded-xl flex items-start justify-between gap-3 text-xs mb-6">
+          <div className="flex items-start space-x-3">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500" />
+            <div>
+              <span className="font-bold">GPS Permission Required:</span> You must grant browser GPS permissions to verify your location and unlock logbook submissions.
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={capture}
+            className="px-2.5 py-1 bg-white border border-amber-300 rounded-lg hover:bg-slate-100 font-bold transition-all text-[10px] shrink-0"
+          >
+            Retry GPS
+          </button>
+        </div>
+      );
+    }
+    const dist = getDistanceInMeters(coords.lat, coords.lng, profile.orgLatitude, profile.orgLongitude);
+    if (dist > 500) {
+      return (
+        <div className="bg-rose-50 border border-rose-200 text-rose-850 p-4 rounded-xl flex items-start justify-between gap-3 text-xs mb-6">
+          <div className="flex items-start space-x-3">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-rose-500" />
+            <div>
+              <span className="font-bold">GPS Placement Verification Failed:</span> You are currently located <span className="font-bold font-mono text-rose-700">{Math.round(dist)}m</span> away from your SIWES training placement. Entries are locked because you are outside the 500m radius limit.
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={capture}
+            className="px-2.5 py-1 bg-white border border-rose-300 rounded-lg hover:bg-rose-100/50 font-bold transition-all text-[10px] shrink-0"
+          >
+            Re-verify
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div className="bg-emerald-50 border border-emerald-250 text-emerald-850 p-4 rounded-xl flex items-center space-x-3 text-xs mb-6">
+        <CheckCircle className="w-5 h-5 shrink-0 text-emerald-500" />
+        <span><span className="font-bold">Placement Verified:</span> You are within the authorized SIWES boundaries ({Math.round(dist)}m range). Logbook forms are unlocked.</span>
+      </div>
+    );
+  };
 
   // Handle file uploads
   const onDrop = async (acceptedFiles: File[]) => {
@@ -98,7 +205,7 @@ export default function StudentLogbookDetail() {
     );
   }
 
-  const isEditable = week.status === 'draft';
+  const isEditable = week.status === 'draft' && isWithinLocation === true;
 
   return (
     <div className="space-y-8">
@@ -134,6 +241,8 @@ export default function StudentLogbookDetail() {
               <h2 className="text-lg font-bold text-text-primary">Daily Activity Logs</h2>
               <span className="text-xs text-text-secondary">Monday – Friday</span>
             </div>
+
+            {renderLocationAlert()}
 
             <div className="bg-blue-50/70 border border-blue-200/50 text-blue-800 p-4 rounded-xl flex items-start space-x-3 text-xs">
               <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
@@ -745,7 +854,7 @@ function WeeklyReportForm({ week, onSubmit, isWeekEditable, loading }: ReportPro
     } catch (e) {}
   };
 
-  const isReadOnly = week.status !== 'draft';
+  const isReadOnly = !isWeekEditable;
 
   return (
     <form onSubmit={handleSubmit(onLocalReportSubmit)} className="space-y-4">

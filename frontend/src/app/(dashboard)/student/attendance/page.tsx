@@ -13,6 +13,19 @@ import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import { studentService } from '@/services/student.service';
 
+function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371e3; // Earth radius in meters
+  const rad = (deg: number) => deg * (Math.PI / 180);
+  const dLat = rad(lat2 - lat1);
+  const dLon = rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function StudentAttendancePage() {
   const { user } = useAuth();
   const studentId = user?.id || '';
@@ -42,6 +55,17 @@ export default function StudentAttendancePage() {
     if (!coords) {
       toast.error('Please authorize GPS location to continue.');
       capture();
+      return;
+    }
+
+    if (profile?.orgLatitude && profile?.orgLongitude) {
+      const dist = getDistanceInMeters(coords.lat, coords.lng, profile.orgLatitude, profile.orgLongitude);
+      if (dist > 500) {
+        toast.error(`GPS Verification Failed: You are currently located ${Math.round(dist)}m away from your SIWES training placement. You must be within 500m to clock ${type}.`);
+        return;
+      }
+    } else {
+      toast.error('SIWES placement coordinates not configured. Please set them in My Profile first.');
       return;
     }
 
