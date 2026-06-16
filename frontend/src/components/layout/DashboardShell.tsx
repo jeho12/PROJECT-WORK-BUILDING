@@ -20,8 +20,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       {/* Main Container */}
       <div className="flex flex-col flex-1 w-0 overflow-hidden">
         <Topbar />
-        <main className="flex-1 relative overflow-y-auto focus:outline-none p-6 md:p-8">
-          <div className="max-w-7xl mx-auto w-full">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none p-6 md:p-8 bg-watermark">
+          <div className="max-w-7xl mx-auto w-full relative z-10">
             {children}
           </div>
         </main>

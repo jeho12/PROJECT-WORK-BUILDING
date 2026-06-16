@@ -160,10 +160,12 @@ export default function SupervisorSessionsPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="select-student" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Student
               </label>
               <select
+                id="select-student"
+                title="Select Student"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
@@ -177,10 +179,12 @@ export default function SupervisorSessionsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="select-duration" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Call Duration (Minutes)
               </label>
               <select
+                id="select-duration"
+                title="Call Duration in Minutes"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
@@ -216,10 +220,13 @@ export default function SupervisorSessionsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              <label htmlFor="scheduled-at" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                 Scheduled Date & Time
               </label>
               <input
+                id="scheduled-at"
+                title="Scheduled Date and Time"
+                placeholder="Scheduled Date and Time"
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
@@ -305,6 +312,8 @@ export default function SupervisorSessionsPage() {
                     <button
                       onClick={() => setSessionToCancel(session)}
                       className="p-2 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-lg transition-all focus:outline-none"
+                      title="Cancel Session"
+                      aria-label="Cancel Session"
                     >
                       <Trash2 className="w-4 h-4 shrink-0" />
                     </button>

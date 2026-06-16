@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1e40af;
-  --color-primary-light: #3b82f6;
-  --color-secondary: #059669;
-  --color-accent: #f59e0b;
-  --color-danger: #dc2626;
-  --color-background: #f8fafc;
-  --color-surface: #ffffff;
-  --color-border-custom: #e2e8f0;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-sidebar: #0f172a;
-  --color-sidebar-text: #cbd5e1;
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border-custom: var(--border-custom);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-text: var(--sidebar-text);
+  
+  /* Redefine white and slate-50/100/200 for automatic dark mode translation */
+  --color-white: var(--surface);
+  --color-slate-50: var(--slate-50-override);
+  --color-slate-100: var(--slate-100-override);
+  --color-slate-200: var(--slate-200-override);
   
   --radius-xl: 0.75rem; /* rounded-xl */
   --radius-lg: 0.5rem;  /* rounded-lg */
@@ -20,15 +26,77 @@
 }
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --primary: #1e40af;
+  --primary-light: #3b82f6;
+  --secondary: #059669;
+  --accent: #f59e0b;
+  --danger: #dc2626;
+  
+  /* Softer backgrounds in light mode to avoid excessive white */
+  --background: #f1f5f9; /* Soft Slate-100 background */
+  --surface: #ffffff;    /* White cards */
+  --border-custom: #cbd5e1; /* Slightly darker border for clean separation */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --sidebar: #0f172a;
+  --sidebar-text: #cbd5e1;
+  
+  --slate-50-override: #f8fafc;
+  --slate-100-override: #f1f5f9;
+  --slate-200-override: #e2e8f0;
+}
+
+.dark {
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --secondary: #10b981;
+  --accent: #fbbf24;
+  --danger: #ef4444;
+  
+  /* Dark mode palette */
+  --background: #0f172a; /* Slate-900 background */
+  --surface: #1e293b;    /* Slate-800 cards */
+  --border-custom: #334155; /* Slate-700 borders */
+  --text-primary: #f8fafc;  /* Slate-50 main text */
+  --text-secondary: #94a3b8; /* Slate-400 sub text */
+  --sidebar: #020617;    /* Slate-950 sidebar */
+  --sidebar-text: #cbd5e1;
+  
+  --slate-50-override: #1e293b; /* Fallbacks map to slate-800 in dark mode */
+  --slate-100-override: #151f32; /* Slightly darker Slate-850 for inputs */
+  --slate-200-override: #334155;
 }
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Watermark utility classes */
+.bg-watermark {
+  position: relative;
+}
+
+.bg-watermark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/logo-watermark.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 380px;
+  opacity: 0.045; /* Super subtle, premium transparency */
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dark .bg-watermark::before {
+  opacity: 0.025; /* Even softer in dark mode to avoid glare */
+  filter: invert(1) brightness(0.65); /* Invert colors for dark background */
 }
 
 /* Scrollbar tweaks */
@@ -42,6 +110,9 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;

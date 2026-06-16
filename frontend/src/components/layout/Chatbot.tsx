@@ -113,6 +113,8 @@ export default function Chatbot() {
         <button
           onClick={() => setIsOpen(true)}
           className="p-4 bg-primary hover:bg-primary-light text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:rotate-12 focus:outline-none flex items-center justify-center border-2 border-white"
+          title="Open Chatbot"
+          aria-label="Open Chatbot"
         >
           <MessageSquare className="w-6 h-6 animate-pulse" />
         </button>
@@ -141,6 +143,8 @@ export default function Chatbot() {
               <button 
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white transition-colors focus:outline-none"
+                title="Close Chatbot"
+                aria-label="Close Chatbot"
               >
                 <X className="w-4.5 h-4.5" />
               </button>

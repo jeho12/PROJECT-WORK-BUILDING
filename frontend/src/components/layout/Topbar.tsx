@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useUIStore } from '@/store/uiStore';
-import { Menu, Bell, User, LogOut } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Topbar() {
   const pathname = usePathname();
   const { toggleSidebar } = useUIStore();
   const { user, role, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Derive title from pathname
@@ -42,6 +44,8 @@ export default function Topbar() {
         <button
           onClick={toggleSidebar}
           className="md:hidden p-2 text-text-secondary hover:bg-slate-100 hover:text-text-primary rounded-lg transition-all"
+          title="Toggle Sidebar"
+          aria-label="Toggle Sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -52,6 +56,20 @@ export default function Topbar() {
 
       {/* Header actions */}
       <div className="flex items-center space-x-4">
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          aria-label={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          className="p-2 text-text-secondary hover:bg-slate-100 hover:text-text-primary rounded-full transition-all focus:outline-none"
+        >
+          {theme === 'light' ? (
+            <Moon className="w-5 h-5" />
+          ) : (
+            <Sun className="w-5 h-5 text-amber-500" />
+          )}
+        </button>
+
         {/* Notification Bell */}
         <div className="relative cursor-pointer p-2 text-text-secondary hover:bg-slate-50 hover:text-text-primary rounded-full transition-all">
           <Bell className="w-5 h-5" />

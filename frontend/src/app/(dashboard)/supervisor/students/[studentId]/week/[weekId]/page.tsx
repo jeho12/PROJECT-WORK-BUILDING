@@ -399,10 +399,13 @@ export default function StudentReviewWorkspace() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+                      <label htmlFor="supervisor-signature" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                         Supervisor E-Signature name
                       </label>
                       <input
+                        id="supervisor-signature"
+                        title="Supervisor E-Signature name"
+                        placeholder="Enter your signature name"
                         type="text"
                         value={signature}
                         onChange={(e) => setSignature(e.target.value)}
@@ -410,10 +413,13 @@ export default function StudentReviewWorkspace() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+                      <label htmlFor="dean-rank" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                         Dean Rank / Designation
                       </label>
                       <input
+                        id="dean-rank"
+                        title="Dean Rank / Designation"
+                        placeholder="e.g. Professor, HOD"
                         type="text"
                         value={rank}
                         onChange={(e) => setRank(e.target.value)}

@@ -77,10 +77,12 @@ export default function SupervisorAIReviewsPage() {
         <h3 className="text-base font-bold text-text-primary mb-4">Compile Periodic Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+            <label htmlFor="select-student" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
               Select Student
             </label>
             <select
+              id="select-student"
+              title="Select Student"
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
@@ -95,10 +97,12 @@ export default function SupervisorAIReviewsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+            <label htmlFor="select-month" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
               Evaluation Month
             </label>
             <select
+              id="select-month"
+              title="Evaluation Month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
@@ -113,10 +117,12 @@ export default function SupervisorAIReviewsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+            <label htmlFor="select-year" className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
               Evaluation Year
             </label>
             <select
+              id="select-year"
+              title="Evaluation Year"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary font-medium"
