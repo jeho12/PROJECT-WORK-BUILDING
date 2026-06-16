@@ -577,6 +577,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeInParsed.hour}
                       onChange={(e) => handleTimeInChange('hour', e.target.value)}
+                      title="Checked-in Hour"
+                      aria-label="Checked-in Hour"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {hoursList.map((h) => (
@@ -588,6 +590,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeInParsed.minute}
                       onChange={(e) => handleTimeInChange('minute', e.target.value)}
+                      title="Checked-in Minute"
+                      aria-label="Checked-in Minute"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {minutesList.map((m) => (
@@ -599,6 +603,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeInParsed.period}
                       onChange={(e) => handleTimeInChange('period', e.target.value)}
+                      title="Checked-in AM/PM Period"
+                      aria-label="Checked-in AM/PM Period"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {periodsList.map((p) => (
@@ -620,6 +626,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeOutParsed.hour}
                       onChange={(e) => handleTimeOutChange('hour', e.target.value)}
+                      title="Checked-out Hour"
+                      aria-label="Checked-out Hour"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {hoursList.map((h) => (
@@ -631,6 +639,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeOutParsed.minute}
                       onChange={(e) => handleTimeOutChange('minute', e.target.value)}
+                      title="Checked-out Minute"
+                      aria-label="Checked-out Minute"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {minutesList.map((m) => (
@@ -642,6 +652,8 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                       disabled={!isWeekEditable || loading}
                       value={timeOutParsed.period}
                       onChange={(e) => handleTimeOutChange('period', e.target.value)}
+                      title="Checked-out AM/PM Period"
+                      aria-label="Checked-out AM/PM Period"
                       className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
                     >
                       {periodsList.map((p) => (
