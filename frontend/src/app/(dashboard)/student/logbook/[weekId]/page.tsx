@@ -436,14 +436,57 @@ interface DailyCardProps {
 
 function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps) {
   const [expanded, setExpanded] = useState(!day.isLocked);
-  const { register, handleSubmit, formState: { errors } } = useForm<DailyEntryInput>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<DailyEntryInput>({
     resolver: zodResolver(dailyEntrySchema),
     defaultValues: {
-      timeIn: day.timeIn,
-      timeOut: day.timeOut,
+      timeIn: day.timeIn || '09:00',
+      timeOut: day.timeOut || '17:00',
       activity: day.activity
     }
   });
+
+  const watchTimeIn = watch('timeIn');
+  const watchTimeOut = watch('timeOut');
+
+  const parse24Hour = (timeStr: string) => {
+    if (!timeStr) return { hour: 9, minute: '00', period: 'AM' as const };
+    const [hStr, mStr] = timeStr.split(':');
+    let h = parseInt(hStr, 10);
+    if (isNaN(h)) h = 9;
+    const period = h >= 12 ? 'PM' : 'AM';
+    let hour12 = h % 12;
+    if (hour12 === 0) hour12 = 12;
+    const m = mStr || '00';
+    return { hour: hour12, minute: m, period };
+  };
+
+  const format24Hour = (hour12: number, minute: string, period: 'AM' | 'PM') => {
+    let h = hour12;
+    if (period === 'PM' && h < 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    const hStr = h.toString().padStart(2, '0');
+    const mStr = minute.padStart(2, '0');
+    return `${hStr}:${mStr}`;
+  };
+
+  const timeInParsed = parse24Hour(watchTimeIn);
+  const timeOutParsed = parse24Hour(watchTimeOut);
+
+  const handleTimeInChange = (field: 'hour' | 'minute' | 'period', value: string) => {
+    const nextParsed = { ...timeInParsed, [field]: field === 'hour' ? parseInt(value, 10) : value };
+    const next24 = format24Hour(nextParsed.hour as number, nextParsed.minute, nextParsed.period as 'AM' | 'PM');
+    setValue('timeIn', next24, { shouldValidate: true });
+  };
+
+  const handleTimeOutChange = (field: 'hour' | 'minute' | 'period', value: string) => {
+    const nextParsed = { ...timeOutParsed, [field]: field === 'hour' ? parseInt(value, 10) : value };
+    const next24 = format24Hour(nextParsed.hour as number, nextParsed.minute, nextParsed.period as 'AM' | 'PM');
+    setValue('timeOut', next24, { shouldValidate: true });
+  };
+
+  const hoursList = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+  const periodsList = ['AM', 'PM'] as const;
 
   const onLocalSubmit = async (data: DailyEntryInput) => {
     try {
@@ -529,14 +572,41 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                   <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                     Time Checked In
                   </label>
-                  <input
-                    type="time"
-                    disabled={!isWeekEditable || loading}
-                    {...register('timeIn')}
-                    className={`w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary ${
-                      errors.timeIn ? 'border-rose-400' : ''
-                    }`}
-                  />
+                  <div className="flex space-x-2">
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeInParsed.hour}
+                      onChange={(e) => handleTimeInChange('hour', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {hoursList.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeInParsed.minute}
+                      onChange={(e) => handleTimeInChange('minute', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {minutesList.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeInParsed.period}
+                      onChange={(e) => handleTimeInChange('period', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {periodsList.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <input type="hidden" {...register('timeIn')} />
                   {errors.timeIn && (
                     <p className="text-xs text-rose-500 mt-1 font-semibold">{errors.timeIn.message}</p>
                   )}
@@ -545,14 +615,41 @@ function DailyLogCard({ day, onSubmit, isWeekEditable, loading }: DailyCardProps
                   <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                     Time Checked Out
                   </label>
-                  <input
-                    type="time"
-                    disabled={!isWeekEditable || loading}
-                    {...register('timeOut')}
-                    className={`w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary ${
-                      errors.timeOut ? 'border-rose-400' : ''
-                    }`}
-                  />
+                  <div className="flex space-x-2">
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeOutParsed.hour}
+                      onChange={(e) => handleTimeOutChange('hour', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {hoursList.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeOutParsed.minute}
+                      onChange={(e) => handleTimeOutChange('minute', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {minutesList.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      disabled={!isWeekEditable || loading}
+                      value={timeOutParsed.period}
+                      onChange={(e) => handleTimeOutChange('period', e.target.value)}
+                      className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary"
+                    >
+                      {periodsList.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <input type="hidden" {...register('timeOut')} />
                   {errors.timeOut && (
                     <p className="text-xs text-rose-500 mt-1 font-semibold">{errors.timeOut.message}</p>
                   )}

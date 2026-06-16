@@ -12,6 +12,18 @@ interface Message {
 
 const FAQS = [
   {
+    q: "What is the new side-by-side logbook layout?",
+    a: "We redesigned the logbook week detail page to show your Monday–Friday logs, weekly report forms, and evidence upload dropzone side-by-side in a single view! Your progress checklist and today's attendance details are displayed in the right sidebar."
+  },
+  {
+    q: "How do I enter check-in/out times with the AM/PM clock selectors?",
+    a: "You can select the hour (1–12), minute (00–59), and period (AM or PM) directly using the dropdown selectors in your daily logbook cards. The system automatically formats your selection to the standard 24-hour time format."
+  },
+  {
+    q: "Why is switching between profile, dashboard, and logbook so fast?",
+    a: "Tab navigation speed has been optimized using client-side cache queries. The application caches student profile settings, logbooks, and attendance registries for instant loading when toggling sidebars."
+  },
+  {
     q: "How do I log my daily SIWES activities?",
     a: "Go to the 'Logbook' tab on your sidebar, select the active week, expand today's day card, input your hours and activity (min 50 characters), then click 'Submit & Lock Day'. Remember, locked entries cannot be edited!"
   },

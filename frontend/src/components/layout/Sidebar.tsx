@@ -84,7 +84,7 @@ export default function Sidebar() {
         <Building className="w-6 h-6 text-primary-light mr-3" />
         <div className="flex flex-col">
           <span className="font-bold text-sm text-white-pure tracking-wider">AUL SIWES PORTAL</span>
-          <span className="text-[10px] text-slate-300">Anchor University, Lagos</span>
+          <span className="text-[10px] text-slate-200">Anchor University, Lagos</span>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white-pure truncate leading-tight">{user?.name}</p>
-            <p className="text-xs text-slate-300 truncate capitalize">{role}</p>
+            <p className="text-xs text-slate-100 truncate capitalize">{role}</p>
           </div>
         </div>
         <button
