@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Landmark } from "lucide-react";
+import { Landmark, Sun, Moon } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -56,14 +56,57 @@ function HomePage() {
         }, "-=0.3");
       }
 
-      // Stats count-up feel
-      gsap.from(".stat", {
-        scrollTrigger: { trigger: ".stats-section", start: "top 80%" },
-        y: 40,
+      // Stats count-up/down feel
+      const statsTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".stats-section",
+          start: "top 85%",
+          once: true,
+        }
+      });
+
+      statsTl.from(".stat-card", {
+        y: 45,
         opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
+        duration: 0.8,
+        stagger: 0.12,
+        ease: "power3.out",
+      });
+
+      // Animate the numeric values in parallel
+      const numElements = document.querySelectorAll(".stat-number");
+      numElements.forEach((el) => {
+        const startVal = parseInt(el.getAttribute("data-start") || "0", 10);
+        const targetVal = parseInt(el.getAttribute("data-target") || "0", 10);
+        const suffix = el.getAttribute("data-suffix") || "";
+        const isInfinity = el.getAttribute("data-infinity") === "true";
+
+        const obj = { val: startVal };
+        
+        statsTl.to(obj, {
+          val: targetVal,
+          duration: 2.2,
+          ease: "power3.out",
+          onUpdate: () => {
+            if (isInfinity) {
+              const currentVal = Math.round(obj.val);
+              if (currentVal <= 10) {
+                el.innerHTML = "∞";
+              } else {
+                el.innerHTML = currentVal.toString();
+              }
+            } else {
+              el.innerHTML = Math.round(obj.val) + suffix;
+            }
+          },
+          onComplete: () => {
+            if (isInfinity) {
+              el.innerHTML = "∞";
+            } else {
+              el.innerHTML = targetVal + suffix;
+            }
+          }
+        }, "<+=0.25");
       });
 
       // Feature cards scroll reveal
@@ -114,7 +157,7 @@ function HomePage() {
       <a href="#main" className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:p-4 focus:rounded-md">
         Skip to content
       </a>
-      <div id="main" className="min-h-screen overflow-x-hidden transition-colors duration-300 bg-background text-text-primary font-sans">
+      <div id="main" className="bg-watermark min-h-screen overflow-x-hidden transition-colors duration-300 bg-background text-text-primary font-sans">
 
         {/* Navbar */}
         <nav ref={navRef} aria-label="Main navigation" className="flex items-center justify-between py-[1.2rem] px-[2.5rem] border-b border-border-custom sticky top-0 z-50 bg-background/85 backdrop-blur-md transition-colors duration-300">
@@ -152,10 +195,14 @@ function HomePage() {
           <div className="flex gap-3 items-center">
             <button
               onClick={toggleTheme}
-              className="inline-flex items-center justify-center bg-transparent text-text-primary border border-border-custom hover:bg-black/5 dark:hover:bg-white/5 py-3 px-7 rounded-[10px] text-[14px] font-semibold no-underline cursor-pointer transition-colors duration-200"
+              className="inline-flex items-center justify-center bg-transparent text-text-primary border border-border-custom hover:bg-black/5 dark:hover:bg-white/5 w-10 h-10 rounded-[10px] cursor-pointer transition-colors duration-200"
               aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
             >
-              {isDark ? "Light" : "Dark"}
+              {isDark ? (
+                <Sun className="w-5 h-5 text-amber-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700" />
+              )}
             </button>
             <Link
               href="/login"
@@ -175,19 +222,19 @@ function HomePage() {
           {/* Glow */}
           <div className="hero-glow absolute top-[15%] left-1/2 -translate-x-1/2 w-[700px] h-[350px] z-0 pointer-events-none bg-[radial-gradient(ellipse,#3b82f615_0%,transparent_70%)]" />
 
-          <div className="relative z-10 max-w-[820px]">
+          <div className="relative z-10 max-w-[900px]">
             <div ref={badgeRef} className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary text-[12px] font-semibold tracking-[0.15em] uppercase py-[0.4rem] px-[1.1rem] rounded-full mb-8 transition-colors duration-300">
               <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-              SIWES Monitoring System
+              SIWES Monitoring System — Tripartite Management
             </div>
 
-            <h1 ref={headingRef} className="text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.1] mb-6 tracking-[-0.02em]">
-              Your Industrial Training,{" "}
+            <h1 ref={headingRef} className="text-[clamp(2.3rem,5.5vw,4rem)] font-bold leading-[1.1] mb-6 tracking-[-0.02em]">
+              Modernizing SIWES at <span className="text-primary font-style-normal not-italic">Anchor University</span>, <br className="hidden sm:inline" />
               <em className="text-primary font-style-normal not-italic">Fully Digital.</em>
             </h1>
 
-            <p ref={subRef} className="text-[1.1rem] text-text-secondary max-w-[540px] leading-[1.7] mx-auto mb-10">
-              Replace paper logbooks with a secure, cloud-based workspace. Track daily logs, get supervisor approvals, and generate report analytics.
+            <p ref={subRef} className="text-[1.1rem] text-text-secondary max-w-[680px] leading-[1.7] mx-auto mb-10">
+              Replacing paper logbooks with a secure, cloud-based digital workspace. Empowering students, supervisors, and admins with daily logs, GPS check-ins, AI analysis, and online supervision.
             </p>
 
             <div ref={btnsRef} className="flex gap-4 justify-center flex-wrap">
@@ -208,26 +255,49 @@ function HomePage() {
         </section>
 
         {/* Stats */}
-        <div className="stats-section flex gap-12 justify-center flex-wrap py-8 px-8 pb-16">
-          {[
-            { num: "4", label: "User roles" },
-            { num: "20+", label: "Features" },
-            { num: "100%", label: "Cloud-based" },
-            { num: "∞", label: "Log entries" },
-          ].map((s) => (
-            <div key={s.label} className="stat text-center min-w-[120px]">
-              <div className="text-[2.5rem] font-bold text-primary">{s.num}</div>
-              <div className="text-[13px] text-text-secondary mt-1">{s.label}</div>
-            </div>
-          ))}
+        <div className="stats-section max-w-[1100px] mx-auto py-8 px-8 pb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">
+            {[
+              { label: "User roles", target: 4, start: 50, suffix: "" },
+              { label: "Features", target: 20, start: 120, suffix: "+" },
+              { label: "Cloud-based", target: 100, start: 300, suffix: "%" },
+              { label: "Log entries", target: 0, start: 999, suffix: "", isInfinity: true },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="stat-card bg-surface border border-border-custom px-6 py-8 rounded-2xl shadow-xs hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col justify-center items-center relative overflow-hidden group"
+              >
+                {/* Subtle radial glow inside on hover */}
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-[0.04] dark:group-hover:opacity-[0.06] transition-opacity duration-500 pointer-events-none stat-card-glow"
+                />
+                
+                <div className="text-[2.5rem] md:text-[3rem] font-extrabold text-primary font-mono tracking-tight leading-none mb-2">
+                  <span
+                    className="stat-number"
+                    data-start={s.start}
+                    data-target={s.target}
+                    data-suffix={s.suffix}
+                    data-infinity={s.isInfinity ? "true" : "false"}
+                  >
+                    {s.start}
+                    {s.suffix}
+                  </span>
+                </div>
+                <div className="text-[12px] md:text-[13px] font-semibold text-text-secondary uppercase tracking-wider text-center">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Features */}
         <section id="features" className="py-20 px-8 max-w-[1100px] mx-auto">
-          <p className="text-center text-[12px] font-semibold tracking-[0.2em] uppercase text-primary mb-4">
+          <p className="text-center text-[14px] font-semibold tracking-[0.2em] uppercase text-primary mb-4">
             What's included
           </p>
-          <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-12 tracking-[-0.01em]">
+          <h2 className="text-center text-[clamp(2.2rem,4vw,3rem)] font-bold mb-12 tracking-[-0.01em]">
             Everything SIWES Needs
           </h2>
 
@@ -255,8 +325,8 @@ function HomePage() {
                     <path d={card.icon} />
                   </svg>
                 </div>
-                <h3 className="text-[16px] font-semibold mb-3">{card.title}</h3>
-                <p className="text-[14px] text-text-secondary leading-[1.6]">{card.desc}</p>
+                <h3 className="text-[18px] font-semibold mb-3">{card.title}</h3>
+                <p className="text-[15px] text-text-secondary leading-[1.6]">{card.desc}</p>
               </div>
             ))}
           </div>
@@ -264,7 +334,7 @@ function HomePage() {
 
         {/* Roles */}
         <section id="roles" className="roles-section py-16 px-8 max-w-[1100px] mx-auto text-center">
-          <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-bold mb-10 tracking-[-0.01em]">
+          <h2 className="text-[clamp(2.2rem,4vw,3rem)] font-bold mb-10 tracking-[-0.01em]">
             Built for every user
           </h2>
           <div className="flex flex-wrap gap-4 justify-center">
@@ -276,7 +346,7 @@ function HomePage() {
             ].map((r) => (
               <div
                 key={r.role}
-                className="role-pill bg-surface border border-border-custom rounded-full py-[0.6rem] px-[1.4rem] text-[14px] text-text-primary transition-colors duration-300"
+                className="role-pill bg-surface border border-border-custom rounded-full py-[0.8rem] px-[1.8rem] text-[16px] text-text-primary transition-colors duration-300"
               >
                 <strong className="text-primary">{r.role}</strong> — {r.desc}
               </div>
