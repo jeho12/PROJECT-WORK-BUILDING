@@ -5,6 +5,7 @@ export const updateProfileSchema = z.object({
     matric_number: z.string().min(3, 'Matric number must be at least 3 characters long'),
     department: z.string().min(2, 'Department is required'),
     faculty: z.string().min(2, 'Faculty is required'),
+    programme: z.string().optional().nullable(),
     level: z.string().min(1, 'Level is required'),
     school_email: z.string().email('Invalid school email address').optional().nullable(),
     organization_name: z.string().min(2, 'Organization name is required').optional().nullable(),

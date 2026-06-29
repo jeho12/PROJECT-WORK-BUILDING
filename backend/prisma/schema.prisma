@@ -77,6 +77,7 @@ model StudentProfile {
   matric_number           String   @unique
   department              String
   faculty                 String
+  programme               String?  @default("")
   level                   String
   school_email            String?
   organization_name       String?

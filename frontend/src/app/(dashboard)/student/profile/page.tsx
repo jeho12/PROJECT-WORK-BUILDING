@@ -12,6 +12,66 @@ import toast from 'react-hot-toast';
 import { Upload, MapPin, Save, User } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
+const FACULTY_DATA: Record<string, { departments: Record<string, string[]> }> = {
+  "Science & Science Education": {
+    departments: {
+      "Mathematical Sciences (Computing & Math)": [
+        "Computer Science",
+        "Software Engineering",
+        "Information Technology",
+        "Cyber Security",
+        "Mathematics"
+      ],
+      "Chemical Sciences": [
+        "Industrial Chemistry",
+        "Biochemistry"
+      ],
+      "Biological Sciences": [
+        "Microbiology",
+        "Biotechnology"
+      ],
+      "Physical Sciences": [
+        "Physics with Electronics",
+        "Geophysics"
+      ]
+    }
+  },
+  "Social & Management Sciences": {
+    departments: {
+      "Accounting & Finance": [
+        "Accounting",
+        "Banking & Finance"
+      ],
+      "Business Administration": [
+        "Business Administration"
+      ],
+      "Economics": [
+        "Economics"
+      ],
+      "Mass Communication": [
+        "Mass Communication"
+      ],
+      "Political Science": [
+        "Political Science"
+      ]
+    }
+  },
+  "Humanities": {
+    departments: {
+      "Languages": [
+        "English & Literary Studies",
+        "French"
+      ],
+      "History & Diplomatic Studies": [
+        "History & Diplomatic Studies"
+      ],
+      "Christian Religious Studies": [
+        "Christian Religious Studies"
+      ]
+    }
+  }
+};
+
 export default function StudentProfilePage() {
   const queryClient = useQueryClient();
   const { user, updateUser } = useAuthStore();
@@ -29,6 +89,7 @@ export default function StudentProfilePage() {
     handleSubmit,
     setValue,
     getValues,
+    watch,
     formState: { errors }
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema)
@@ -40,11 +101,27 @@ export default function StudentProfilePage() {
     enabled: !!studentId
   });
 
+  const watchedFaculty = watch('faculty');
+  const watchedDepartment = watch('department');
+
+  const facultyOptions = Object.keys(FACULTY_DATA);
+  const departmentOptions = watchedFaculty && FACULTY_DATA[watchedFaculty]
+    ? Object.keys(FACULTY_DATA[watchedFaculty].departments)
+    : [];
+  const programmeOptions = watchedFaculty && watchedDepartment && FACULTY_DATA[watchedFaculty]?.departments[watchedDepartment]
+    ? FACULTY_DATA[watchedFaculty].departments[watchedDepartment]
+    : [];
+
+  const hasCustomFaculty = profile?.faculty && !facultyOptions.includes(profile.faculty);
+  const hasCustomDepartment = profile?.department && !departmentOptions.includes(profile.department);
+  const hasCustomProgramme = profile?.programme && !programmeOptions.includes(profile.programme);
+
   useEffect(() => {
     if (profile) {
       setValue('matricNumber', profile.matricNumber);
-      setValue('department', profile.department);
       setValue('faculty', profile.faculty);
+      setValue('department', profile.department);
+      setValue('programme', profile.programme || '');
       setValue('level', profile.level);
       setValue('organizationName', profile.organizationName);
       setValue('organizationAddress', profile.organizationAddress);
@@ -61,6 +138,29 @@ export default function StudentProfilePage() {
       }
     }
   }, [profile, setValue]);
+
+  // Reset department & programme when faculty changes
+  useEffect(() => {
+    if (watchedFaculty) {
+      const allowedDepts = FACULTY_DATA[watchedFaculty]?.departments || {};
+      const currentDept = getValues('department');
+      if (!Object.keys(allowedDepts).includes(currentDept) && currentDept !== profile?.department) {
+        setValue('department', '');
+        setValue('programme', '');
+      }
+    }
+  }, [watchedFaculty, setValue, getValues, profile]);
+
+  // Reset programme when department changes
+  useEffect(() => {
+    if (watchedFaculty && watchedDepartment) {
+      const allowedProgs = FACULTY_DATA[watchedFaculty]?.departments[watchedDepartment] || [];
+      const currentProg = getValues('programme');
+      if (!allowedProgs.includes(currentProg) && currentProg !== profile?.programme) {
+        setValue('programme', '');
+      }
+    }
+  }, [watchedDepartment, watchedFaculty, setValue, getValues, profile]);
 
   // Set coordinates when geolocation captures them
   useEffect(() => {
@@ -222,34 +322,70 @@ export default function StudentProfilePage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+                    Faculty
+                  </label>
+                  <select
+                    {...register('faculty')}
+                    className={`w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary ${
+                      errors.faculty ? 'border-rose-400 focus:border-rose-400' : ''
+                    }`}
+                  >
+                    <option value="">Select Faculty</option>
+                    {facultyOptions.map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                    {hasCustomFaculty && (
+                      <option value={profile?.faculty}>{profile?.faculty}</option>
+                    )}
+                  </select>
+                  {errors.faculty && (
+                    <p className="text-xs text-rose-500 mt-1">{errors.faculty.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
                     Department
                   </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Computer Science"
+                  <select
                     {...register('department')}
                     className={`w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary ${
-                      errors.department ? 'border-rose-400' : ''
+                      errors.department ? 'border-rose-400 focus:border-rose-400' : ''
                     }`}
-                  />
+                  >
+                    <option value="">Select Department</option>
+                    {departmentOptions.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                    {hasCustomDepartment && (
+                      <option value={profile?.department}>{profile?.department}</option>
+                    )}
+                  </select>
                   {errors.department && (
                     <p className="text-xs text-rose-500 mt-1">{errors.department.message}</p>
                   )}
                 </div>
-                <div>
+
+                <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
-                    Faculty
+                    Programme / Course of Study
                   </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Science & Science Education"
-                    {...register('faculty')}
+                  <select
+                    {...register('programme')}
                     className={`w-full px-3 py-2 text-sm bg-slate-50 border border-border-custom outline-none rounded-lg focus:bg-white focus:border-primary transition-all text-text-primary ${
-                      errors.faculty ? 'border-rose-400' : ''
+                      errors.programme ? 'border-rose-400 focus:border-rose-400' : ''
                     }`}
-                  />
-                  {errors.faculty && (
-                    <p className="text-xs text-rose-500 mt-1">{errors.faculty.message}</p>
+                  >
+                    <option value="">Select Programme</option>
+                    {programmeOptions.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                    {hasCustomProgramme && (
+                      <option value={profile?.programme}>{profile?.programme}</option>
+                    )}
+                  </select>
+                  {errors.programme && (
+                    <p className="text-xs text-rose-500 mt-1">{errors.programme.message}</p>
                   )}
                 </div>
               </div>

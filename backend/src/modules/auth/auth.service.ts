@@ -35,6 +35,7 @@ export class AuthService {
             matric_number: `AUL-${newUser.id.slice(-6).toUpperCase()}`, // auto fallback placeholder
             department: 'Computer Science',
             faculty: 'Natural & Applied Sciences',
+            programme: 'Computer Science',
             level: '400',
             profile_complete: false,
           },

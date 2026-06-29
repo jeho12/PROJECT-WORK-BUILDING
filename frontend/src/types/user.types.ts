@@ -13,6 +13,7 @@ export interface StudentProfile {
   matricNumber: string;
   department: string;
   faculty: string;
+  programme?: string;
   level: '100' | '200' | '300' | '400' | '500';
   organizationName: string;
   organizationAddress: string;
