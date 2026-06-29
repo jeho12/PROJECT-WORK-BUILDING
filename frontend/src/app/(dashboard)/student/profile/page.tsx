@@ -13,61 +13,21 @@ import { Upload, MapPin, Save, User } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const FACULTY_DATA: Record<string, { departments: Record<string, string[]> }> = {
-  "Science & Science Education": {
+  "Science": {
     departments: {
-      "Mathematical Sciences (Computing & Math)": [
-        "Computer Science",
-        "Software Engineering",
-        "Information Technology",
-        "Cyber Security",
-        "Mathematics"
-      ],
-      "Chemical Sciences": [
-        "Industrial Chemistry",
-        "Biochemistry"
-      ],
-      "Biological Sciences": [
-        "Microbiology",
-        "Biotechnology"
-      ],
-      "Physical Sciences": [
-        "Physics with Electronics",
-        "Geophysics"
-      ]
+      "Computer Science": ["Computer Science"],
+      "Software Engineering": ["Software Engineering"],
+      "Biological Sciences": ["Biological Sciences"],
+      "Biochemistry": ["Biochemistry"],
+      "Biotechnology": ["Biotechnology"],
+      "Physics": ["Physics"],
+      "Physics & Electronics": ["Physics & Electronics"],
+      "Industrial Chemistry": ["Industrial Chemistry"]
     }
   },
-  "Social & Management Sciences": {
+  "Architecture": {
     departments: {
-      "Accounting & Finance": [
-        "Accounting",
-        "Banking & Finance"
-      ],
-      "Business Administration": [
-        "Business Administration"
-      ],
-      "Economics": [
-        "Economics"
-      ],
-      "Mass Communication": [
-        "Mass Communication"
-      ],
-      "Political Science": [
-        "Political Science"
-      ]
-    }
-  },
-  "Humanities": {
-    departments: {
-      "Languages": [
-        "English & Literary Studies",
-        "French"
-      ],
-      "History & Diplomatic Studies": [
-        "History & Diplomatic Studies"
-      ],
-      "Christian Religious Studies": [
-        "Christian Religious Studies"
-      ]
+      "Architecture": ["Architecture"]
     }
   }
 };
