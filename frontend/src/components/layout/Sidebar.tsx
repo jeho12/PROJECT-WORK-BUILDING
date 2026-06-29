@@ -81,7 +81,11 @@ export default function Sidebar() {
     <aside className="w-64 bg-sidebar text-sidebar-text flex flex-col h-full border-r border-slate-800">
       {/* Brand logo header */}
       <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950/20">
-        <Building className="w-6 h-6 text-primary-light mr-3" />
+        <img 
+          src="/logo-watermark.png" 
+          alt="Anchor University Logo" 
+          className="w-8 h-8 object-contain mr-3 logo-hover" 
+        />
         <div className="flex flex-col">
           <span className="font-bold text-sm text-white-pure tracking-wider">AUL SIWES PORTAL</span>
           <span className="text-[10px] text-slate-200">Anchor University, Lagos</span>

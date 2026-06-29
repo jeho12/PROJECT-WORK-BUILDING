@@ -162,7 +162,11 @@ function HomePage() {
         {/* Navbar */}
         <nav ref={navRef} aria-label="Main navigation" className="flex items-center justify-between py-[1.2rem] px-[2.5rem] border-b border-border-custom sticky top-0 z-50 bg-background/85 backdrop-blur-md transition-colors duration-300">
           <div className="flex items-center gap-[10px]">
-            <Landmark className="w-6 h-6 text-primary" />
+            <img 
+              src="/logo-watermark.png" 
+              alt="Anchor University Logo" 
+              className="w-8 h-8 object-contain logo-hover" 
+            />
             <div className="flex flex-col leading-[1.1]">
               <span className="text-[14px] font-bold text-primary tracking-[0.05em] uppercase">
                 Anchor University
@@ -265,14 +269,14 @@ function HomePage() {
             ].map((s) => (
               <div
                 key={s.label}
-                className="stat-card bg-surface border border-border-custom px-6 py-8 rounded-2xl shadow-xs hover:shadow-md hover:border-primary/30 transition-all duration-300 flex flex-col justify-center items-center relative overflow-hidden group"
+                className="stat-card bg-surface border border-border-custom px-6 py-8 rounded-2xl shadow-xs hover:shadow-lg hover:border-primary/50 transition-all duration-300 flex flex-col justify-center items-center relative overflow-hidden group"
               >
                 {/* Subtle radial glow inside on hover */}
                 <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-[0.04] dark:group-hover:opacity-[0.06] transition-opacity duration-500 pointer-events-none stat-card-glow"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-[0.12] dark:group-hover:opacity-[0.18] transition-opacity duration-500 pointer-events-none stat-card-glow"
                 />
                 
-                <div className="text-[2.5rem] md:text-[3rem] font-extrabold text-primary font-mono tracking-tight leading-none mb-2">
+                <div className="text-[2.5rem] md:text-[3rem] font-extrabold text-primary font-mono tracking-tight leading-none mb-2 transform transition-transform duration-300 group-hover:scale-108 group-hover:-translate-y-1">
                   <span
                     className="stat-number"
                     data-start={s.start}
@@ -284,7 +288,7 @@ function HomePage() {
                     {s.suffix}
                   </span>
                 </div>
-                <div className="text-[12px] md:text-[13px] font-semibold text-text-secondary uppercase tracking-wider text-center">
+                <div className="text-[12px] md:text-[13px] font-semibold text-text-secondary uppercase tracking-wider text-center transition-colors duration-300 group-hover:text-primary-light">
                   {s.label}
                 </div>
               </div>
